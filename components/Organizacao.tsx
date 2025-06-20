@@ -3,6 +3,7 @@ import { Peca } from "./Pecas";
 export type Casa = {
   linha: number; 
   coluna: number; 
+  peca?: Peca
 };
 
 export type Acao =
@@ -22,6 +23,7 @@ export type Resposta = {
 };
 
 export type Lance = {
+    capturas: boolean;
     casa_inicial: Casa,
     casa_final: Casa,
     acao: Acao,
@@ -34,8 +36,18 @@ export type Jogada = {
     lances: Lance[]
 };
 
+export type PosicaoInicial = {
+    casa: Casa,
+    peca: Peca
+}
+
 export type Posicao = {
     numero: number,
     jogadas: Jogada[],
-    estado: 'inicial' | "andamento" | 'final'
+    estado: "andamento" | 'final'
 };
+
+export type Exercicio = {
+    posicaoInicial: PosicaoInicial[],
+    posicoes: Posicao[]
+}

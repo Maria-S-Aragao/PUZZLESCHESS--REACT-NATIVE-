@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import React from 'react';
+import { JogoSimples } from './components/MinhaLogica';
+import { ContrucaoPuzzleOne } from "./components/posicoes/Puzzle"
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <JogoSimples exercicio={ContrucaoPuzzleOne()} linhas={4} colunas={2} />
     </View>
   );
 }
@@ -15,6 +17,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 });

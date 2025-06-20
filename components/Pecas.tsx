@@ -1,7 +1,7 @@
 import { ImageSourcePropType, ImageStyle } from 'react-native';
 
 export type Peca = {
-    nome: 'rei' | 'dama' | 'bispo' | 'cavalo' | 'peao',
+    nome: 'rei' | 'dama' | 'bispo' | 'cavalo' | 'peao' | 'torre',
     cor: 'branco' | 'preto',
     imagem: ImageSourcePropType,
     estilo?: ImageStyle
@@ -18,35 +18,42 @@ export function Pecas() {
     const reiBranco: Peca = {
         nome: 'rei',
         cor: 'branco',
-        imagem: require('./assets/ReiBranco.png'),
+        imagem: require('../assets/ReiBranco.png'),
         estilo: estiloPadrao
     };
 
     const damaBranca: Peca = {
         nome: 'dama',
         cor: 'branco',
-        imagem: require('./assets/DamaBranca.png'),
+        imagem: require('../assets/DamaBranca.png'),
         estilo: estiloPadrao
     };
 
     const bispoBranco: Peca = {
         nome: 'bispo',
         cor: 'branco',
-        imagem: require('./assets/BispoBranco.png'),
+        imagem: require('../assets/BispoBranco.png'),
         estilo: estiloPadrao
     };
 
     const cavaloBranco: Peca = {
         nome: 'cavalo',
         cor: 'branco',
-        imagem: require('./assets/CavaloBranco.png'),
+        imagem: require('../assets/CavaloBranco.png'),
         estilo: estiloPadrao
     };
 
     const peaoBranco: Peca = {
         nome: 'peao',
         cor: 'branco',
-        imagem: require('./assets/PeaoBranco.png'),
+        imagem: require('../assets/PeaoBranco.png'),
+        estilo: estiloPadrao
+    };
+
+    const torreBranca: Peca = {
+        nome: 'torre',
+        cor: 'branco',
+        imagem: require('../assets/TorreBranca.png'),
         estilo: estiloPadrao
     };
 
@@ -54,35 +61,42 @@ export function Pecas() {
     const reiPreto: Peca = {
         nome: 'rei',
         cor: 'preto',
-        imagem: require('./assets/ReiPreto.png'),
+        imagem: require('../assets/ReiPreto.png'),
         estilo: estiloPadrao
     };
 
     const damaPreta: Peca = {
         nome: 'dama',
         cor: 'preto',
-        imagem: require('./assets/DamaPreta.png'),
+        imagem: require('../assets/DamaPreta.png'),
         estilo: estiloPadrao
     };
 
     const bispoPreto: Peca = {
         nome: 'bispo',
         cor: 'preto',
-        imagem: require('./assets/BispoPreto.png'),
+        imagem: require('../assets/BispoPreto.png'),
         estilo: estiloPadrao
     };
 
     const cavaloPreto: Peca = {
         nome: 'cavalo',
         cor: 'preto',
-        imagem: require('./assets/CavaloPreto.png'),
+        imagem: require('../assets/CavaloPreto.png'),
         estilo: estiloPadrao
     };
 
     const peaoPreto: Peca = {
         nome: 'peao',
         cor: 'preto',
-        imagem: require('./assets/PeaoPreto.png'),
+        imagem: require('../assets/PeaoPreto.png'),
+        estilo: estiloPadrao
+    };
+
+    const torrePreta: Peca = {
+        nome: 'torre',
+        cor: 'preto',
+        imagem: require('../assets/Torre.png'),
         estilo: estiloPadrao
     };
 
@@ -96,6 +110,8 @@ export function Pecas() {
         damaPreta,
         bispoPreto,
         cavaloPreto,
-        peaoPreto
+        peaoPreto, 
+        torreBranca,
+        torrePreta
     }
 }
