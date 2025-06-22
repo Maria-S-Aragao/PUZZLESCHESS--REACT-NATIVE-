@@ -1,13 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import React from 'react';
-import { JogoSimples } from './components/MinhaLogica';
-import { ContrucaoPuzzleOne } from "./components/posicoes/Puzzle"
+import { Jogo } from './context/RenderizadorJogo';
+import { ContrucaoPuzzleOne } from './models/PuzzleOne';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <JogoSimples exercicio={ContrucaoPuzzleOne()} linhas={4} colunas={2} />
+      <Jogo exercicio={ContrucaoPuzzleOne()} linhas={4} colunas={2} />
     </View>
   );
 }

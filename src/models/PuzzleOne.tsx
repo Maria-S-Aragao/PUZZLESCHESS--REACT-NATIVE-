@@ -1,9 +1,12 @@
-import { Exercicio, Lance, PosicaoInicial, Acao, Jogada, Posicao } from "../Organizacao";
-import { Pecas } from "../Pecas";
+import { Exercicio } from "../types/Exercicio";
+import { Lance } from "../types/Lance";
+import { Posicao } from "../types/Posicao";
+import { PosicaoInicial } from "../types/PosicaoInicial";
+import * as Pecas from '../constants/Pecas';
 
 export function ContrucaoPuzzleOne(): Exercicio {
     //Peças que serão utilizadas no exercício
-    const { reiPreto, damaBranca, torrePreta } = Pecas();
+    const { reiPreto, damaBranca, torrePreta } = Pecas;
 
     //Quais as peças que serão iniciadas no tabuleiro
     const posicaoInicial: PosicaoInicial[] = [
@@ -94,8 +97,4 @@ export function ContrucaoPuzzleOne(): Exercicio {
     }
 
     return exercicioPronto;
-}
-
-export function PuzzleOne () {
-    
 }
