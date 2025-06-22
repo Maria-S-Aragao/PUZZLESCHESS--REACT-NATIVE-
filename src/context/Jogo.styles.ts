@@ -6,30 +6,34 @@ export const styles = StyleSheet.create({
         height: 90,
         justifyContent: "center",
         alignItems: "center",
-        borderWidth: 0.5,
-        borderColor: "#333",
     },
 
     casaSelecionada: {
-        borderColor: "yellow",
-        borderWidth: 2,
+
     },
 
     casaDestino: {
-        backgroundColor: "#aaffaa", 
+        position: "relative",
     },
 
     imagemPeca: {
-        width: 100,
-        height: 30,
-        resizeMode: "contain",
+        width: 60,
+        height: 60,
     },
 
     bolinhaDestino: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        width: 30,
+        height: 30,
+        borderRadius: 16,
+        backgroundColor: "rgba(0, 0, 0, 0.22)",
+    },
+
+    bolinhaDestinoGrandes: {
+        position: "absolute",
+        width: 60,
+        height: 60,
+        borderRadius: 32,
+        backgroundColor: "rgba(0, 0, 0, 0.22)",
     },
 
     casaVazia: {
@@ -37,17 +41,8 @@ export const styles = StyleSheet.create({
         height: "100%",
     },
 
-    coordenadas: {
-        fontSize: 8,
-        position: "absolute",
-        bottom: 2,
-        right: 2,
-        color: "#000",
-    },
-
     container: {
         flex: 1,
-        padding: 10,
         justifyContent: "center",
         alignContent: "center"
     },
@@ -120,8 +115,6 @@ export const styles = StyleSheet.create({
 
     tabuleiroContainer: {
         alignSelf: 'center',
-        borderWidth: 2,
-        borderColor: '#8B4513',
     },
 
 });

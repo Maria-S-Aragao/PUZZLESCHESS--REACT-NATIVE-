@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Casa } from "../types/Casa";
 import { Exercicio } from "../types/Exercicio";
@@ -6,10 +7,13 @@ import { casaToString, encontrarPeca, posicaoToEstadoTabuleiro } from "../util/T
 import { StatusJogo } from "../types/StatusJogo";
 import { GeradorTabuleiroGrid } from "../functions/GeradorTabuleiro";
 import { Lance } from "../types/Lance";
-import { Alert, TouchableOpacity, View, Image, Text } from "react-native";
+import { TouchableOpacity, View, Image, Text } from "react-native";
 import { ehCasaDestinoPossivel, obterLancesDasJogadas } from "../functions/Jogadas";
 import { Jogada } from "../types/Jogada";
 import { styles } from "./Jogo.styles";
+import { Peca } from "../types/Peca";
+import * as Pecas from "../constants/Pecas"
+import Entypo from '@expo/vector-icons/Entypo';
 
 interface JogoProps {
     exercicio: Exercicio;
@@ -24,22 +28,33 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
     const [statusJogo, setStatusJogo] = useState<StatusJogo>('jogando');
     const [indiceJogada, setIndiceJogada] = useState(0);
     const [historico, setHistorico] = useState<EstadoTabuleiro[]>([]);
+    const [reiDerrotado, setReiDerrotado] = useState<{ cor: 'branco' | 'preto' } | null>(null);
 
     const tabuleiroGrid = useMemo(() => GeradorTabuleiroGrid(linhas, colunas), [linhas, colunas]);
 
     const encontrarPecaCallback = useCallback((casa: Casa) => encontrarPeca(tabuleiro, casa), [tabuleiro]);
 
     const posicaoAtual = useMemo(() => exercicio.posicoes[indiceJogada], [exercicio.posicoes, indiceJogada]);
-    /*Explicação: Assim como o useCallback, o useMemo guarda em cache o resultado, então neste momento, 
-    está const está retornando a posição atual do exercício se baseando no indiceJogada, de forma melhor
-    explicada, o indice vai retornar um número, e o useMemo vai acessar o array de posições pelo indice 
-    passado: "() => exercicio.posicoes[indiceJogada]". 
-      Agora o segundo parametro passado tem completa relação com o useMemo, que dita que só deve ser 
-    rebuscado a posição quando o exercicio.posicoes mudarem ou quando o indiceJogada mudar.*/
 
     const copiarTabuleiro = useCallback((origem: EstadoTabuleiro): EstadoTabuleiro => { return new Map(origem); }, []);
 
     const podeVoltarLance = historico.length > 1 && statusJogo === 'jogando';
+
+
+    // Função para obter a imagem correta da peça baseada no resultado do jogo
+    const obterImagemPeca = useCallback((peca: Peca): any => {
+        // Se um rei foi derrotado (xeque-mate) e esta peça é o rei derrotado, mostrar versão morta
+        if (reiDerrotado && peca.nome === 'rei' && peca.cor === reiDerrotado.cor) {
+            if (peca.cor === 'branco') {
+                return Pecas.ReiBrancoMorto.imagem;
+            } else if (peca.cor === 'preto') {
+                return Pecas.ReiPretoMorto.imagem;
+            }
+        }
+
+        // Caso contrário, retorna a imagem normal
+        return peca.imagem;
+    }, [reiDerrotado]);
 
     useEffect(() => {
         iniciarOuResetarJogo();
@@ -52,6 +67,7 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
         setIndiceJogada(0);
         setStatusJogo('jogando');
         setPecaSelecionada(null);
+        setReiDerrotado(null); // Reset do rei derrotado
     }, [exercicio.posicaoInicial]);
 
     const executarResposta = useCallback((
@@ -78,13 +94,17 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
         });
     }, []);
 
+    //Tem que alterar de acordo com a l
     const atualizarStatusJogo = useCallback((finalizacao?: Lance['finalizacao']): void => {
         if (finalizacao === 'ganhou') {
             setStatusJogo('ganhou');
+            setReiDerrotado({ cor: 'preto' });
         } else if (finalizacao === 'perdeu') {
             setStatusJogo('perdeu');
+            setReiDerrotado({ cor: 'branco' });
         } else {
             setStatusJogo('jogando');
+            setReiDerrotado(null);
         }
     }, []);
 
@@ -99,7 +119,6 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
         );
 
         if (!lance) {
-            Alert.alert('Movimento inválido', 'Essa jogada não é permitida.');
             return;
         }
 
@@ -163,8 +182,9 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
         setIndiceJogada(prev => Math.max(0, prev - 1));
         setStatusJogo('jogando');
         setPecaSelecionada(null);
+        // Reset do rei derrotado ao voltar lance
+        setReiDerrotado(null);
     }, [historico, statusJogo]);
-
 
     const processarClique = useCallback((casa: Casa) => {
         if (statusJogo !== 'jogando') return;
@@ -223,9 +243,18 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
                     <TouchableOpacity
                         disabled={statusJogo !== 'jogando'}
                         onPress={() => processarClique(casa)}
+                        style={{ position: 'relative' }}
                     >
+                        {destinoPossivel && (
+                            <TouchableOpacity
+                                disabled={statusJogo !== 'jogando'}
+                                onPress={() => processarClique(casa)}
+                                style={styles.bolinhaDestinoGrandes}
+                            />
+                        )}
+
                         <Image
-                            source={pecaNaCasa.peca.imagem}
+                            source={obterImagemPeca(pecaNaCasa.peca)} // Usando a nova função aqui
                             style={styles.imagemPeca}
                         />
                     </TouchableOpacity>
@@ -245,10 +274,12 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
             </View>
         );
     }, [
-        encontrarPeca,
+        encontrarPecaCallback,
         pecaSelecionada,
         statusJogo,
         processarClique,
+        lancesDaPecaSelecionada,
+        obterImagemPeca // Adicionando a nova dependência
     ]);
 
     return (

@@ -12,7 +12,7 @@ export const reiBranco: Peca = {
 export const damaBranca: Peca = {
     nome: 'dama',
     cor: 'branco',
-    imagem: require('../assets/DamaBrancaFofa.png'),
+    imagem: require('../assets/RainhaBrancaFofa.png'),
     estilo: styles.pecas
 };
 
@@ -44,6 +44,13 @@ export const torreBranca: Peca = {
     estilo: styles.pecas
 };
 
+export const ReiBrancoMorto: Peca = {
+    nome: 'rei',
+    cor: 'preto',
+    imagem: require('../assets/ReiBrancoMorto.png'),
+    estilo: styles.pecas
+};
+
 //Peças pretas
 export const reiPreto: Peca = {
     nome: 'rei',
@@ -55,7 +62,7 @@ export const reiPreto: Peca = {
 export const damaPreta: Peca = {
     nome: 'dama',
     cor: 'preto',
-    imagem: require('../assets/DamaPretaFofa.png'),
+    imagem: require('../assets/RainhaPretaFofa.png'),
     estilo: styles.pecas
 };
 
@@ -83,6 +90,13 @@ export const peaoPreto: Peca = {
 export const torrePreta: Peca = {
     nome: 'torre',
     cor: 'preto',
-    imagem: require('../assets/TorreFofa.png'),
+    imagem: require('../assets/TorrePretaFofa.png'),
+    estilo: styles.pecas
+};
+
+export const ReiPretoMorto: Peca = {
+    nome: 'rei',
+    cor: 'preto',
+    imagem: require('../assets/ReiPretoMorto.png'),
     estilo: styles.pecas
 };
