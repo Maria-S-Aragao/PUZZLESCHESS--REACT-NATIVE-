@@ -5,42 +5,42 @@ import { styles } from "./Pecas.styles";
 export const reiBranco: Peca = {
     nome: 'rei',
     cor: 'branco',
-    imagem: require('../assets/ReiBranco.png'),
+    imagem: require('../assets/ReiBrancoFofo.png'),
     estilo: styles.pecas
 };
 
 export const damaBranca: Peca = {
     nome: 'dama',
     cor: 'branco',
-    imagem: require('../assets/DamaBranca.png'),
+    imagem: require('../assets/DamaBrancaFofa.png'),
     estilo: styles.pecas
 };
 
 export const bispoBranco: Peca = {
     nome: 'bispo',
     cor: 'branco',
-    imagem: require('../assets/BispoBranco.png'),
+    imagem: require('../assets/BispoBrancoFofo.png'),
     estilo: styles.pecas
 };
 
 export const cavaloBranco: Peca = {
     nome: 'cavalo',
     cor: 'branco',
-    imagem: require('../assets/CavaloBranco.png'),
+    imagem: require('../assets/CavaloBrancoFofo.png'),
     estilo: styles.pecas
 };
 
 export const peaoBranco: Peca = {
     nome: 'peao',
     cor: 'branco',
-    imagem: require('../assets/PeaoBranco.png'),
+    imagem: require('../assets/PeaoBrancoFofo.png'),
     estilo: styles.pecas
 };
 
 export const torreBranca: Peca = {
     nome: 'torre',
     cor: 'branco',
-    imagem: require('../assets/TorreBranca.png'),
+    imagem: require('../assets/TorreBrancaFofa.png'),
     estilo: styles.pecas
 };
 
@@ -48,41 +48,41 @@ export const torreBranca: Peca = {
 export const reiPreto: Peca = {
     nome: 'rei',
     cor: 'preto',
-    imagem: require('../assets/ReiPreto.png'),
+    imagem: require('../assets/ReiPretoFofo.png'),
     estilo: styles.pecas
 };
 
 export const damaPreta: Peca = {
     nome: 'dama',
     cor: 'preto',
-    imagem: require('../assets/DamaPreta.png'),
+    imagem: require('../assets/DamaPretaFofa.png'),
     estilo: styles.pecas
 };
 
 export const bispoPreto: Peca = {
     nome: 'bispo',
     cor: 'preto',
-    imagem: require('../assets/BispoPreto.png'),
+    imagem: require('../assets/BispoPretoFofo.png'),
     estilo: styles.pecas
 };
 
 export const cavaloPreto: Peca = {
     nome: 'cavalo',
     cor: 'preto',
-    imagem: require('../assets/CavaloPreto.png'),
+    imagem: require('../assets/CavaloPretoFofo.png'),
     estilo: styles.pecas
 };
 
 export const peaoPreto: Peca = {
     nome: 'peao',
     cor: 'preto',
-    imagem: require('../assets/PeaoPreto.png'),
+    imagem: require('../assets/PeaoPretoFofo.png'),
     estilo: styles.pecas
 };
 
 export const torrePreta: Peca = {
     nome: 'torre',
     cor: 'preto',
-    imagem: require('../assets/Torre.png'),
+    imagem: require('../assets/TorreFofa.png'),
     estilo: styles.pecas
 };

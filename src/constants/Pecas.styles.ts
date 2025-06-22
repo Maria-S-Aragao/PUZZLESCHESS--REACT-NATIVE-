@@ -3,8 +3,8 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
 
     pecas: {
-        width: 40,
-        height: 40,
+        width: 60,
+        height: 100,
         resizeMode: 'contain',
     }
 

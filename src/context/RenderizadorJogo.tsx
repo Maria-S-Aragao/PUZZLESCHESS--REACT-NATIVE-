@@ -12,9 +12,9 @@ import { Jogada } from "../types/Jogada";
 import { styles } from "./Jogo.styles";
 
 interface JogoProps {
-  exercicio: Exercicio;
-  linhas: number;
-  colunas: number;
+    exercicio: Exercicio;
+    linhas: number;
+    colunas: number;
 }
 
 export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
@@ -214,7 +214,7 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
                 key={`${i}-${j}`}
                 style={[
                     styles.casa,
-                    { backgroundColor: (i + j) % 2 === 0 ? '#f0d9b5' : '#b58863' },
+                    { backgroundColor: (i + j) % 2 === 0 ? '#FFF1F8' : '#CDB4DB' },
                     isSelecionada && styles.casaSelecionada,
                     destinoPossivel && styles.casaDestino,
                 ]}
@@ -242,10 +242,6 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
                         style={styles.casaVazia}
                     />
                 )}
-
-                <Text style={styles.coordenadas}>
-                    {casa.linha},{casa.coluna}
-                </Text>
             </View>
         );
     }, [
@@ -257,26 +253,6 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
 
     return (
         <View style={styles.container}>
-
-
-            <View style={styles.controles}>
-                <TouchableOpacity
-                    style={[styles.botaoVoltar, !podeVoltarLance && styles.botaoDesabilitado]}
-                    onPress={voltarLance}
-                    disabled={!podeVoltarLance}
-                >
-                    <Text style={styles.textoBotao}>↩️ Voltar Lance</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.botaoReiniciar}
-                    onPress={iniciarOuResetarJogo}
-                >
-                    <Text style={styles.textoBotao}>🔄 Reiniciar</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* {renderizarResultado()} */}
 
             {/* Informações do jogo */}
             <View style={styles.infoJogo}>
@@ -292,6 +268,27 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
                         {linhaCasas.map((casa, j) => renderizarCasa(casa, i, j))}
                     </View>
                 ))}
+            </View>
+
+            {/* Controles do jogo */}
+            <View style={styles.controles}>
+                <TouchableOpacity
+                    style={[
+                        styles.botaoVoltar,
+                        !podeVoltarLance && styles.botaoDesabilitado
+                    ]}
+                    onPress={voltarLance}
+                    disabled={!podeVoltarLance}
+                >
+                    <Text style={styles.textoBotao}>↩️ Voltar Lance</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.botaoReiniciar}
+                    onPress={iniciarOuResetarJogo}
+                >
+                    <Text style={styles.textoBotao}>🔄 Reiniciar</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
