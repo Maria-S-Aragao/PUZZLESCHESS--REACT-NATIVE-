@@ -165,18 +165,17 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 
-    botaoCarregando: {
-        backgroundColor: '#CDB4DB',
-    },
-
     textoBotaoDesabilitado: {
         color: '#9E9E9E',
         fontSize: 14,
         textAlign: 'center',
         lineHeight: 18,
+        justifyContent: "center",
+        alignItems: "center",
     },
 
     containerFinal: {
+        top: 50,
         gap: 30,
         alignItems: "center",
         justifyContent: "center",
@@ -215,10 +214,10 @@ export const styles = StyleSheet.create({
     },
 
     inputComentario: {
-        width: 300,
+        width: 450,
         minHeight: 80,
         maxHeight: 120,
-        borderColor: '#CDB4DB',
+        borderColor: '#FFFFFF',
         borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 10,
@@ -238,11 +237,12 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: 8,
         justifyContent: 'center',
-        gap: 10,
+        gap: 50,
     },
 
     containerExtras: {
-        flexDirection: "column",
+        flexDirection: "row",
+        gap: 15
     }
 
 });

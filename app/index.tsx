@@ -6,7 +6,7 @@ export default function Index() {
   useEffect(() => {
     const redirecionar = async () => {
       const nivelString = await AsyncStorage.getItem("nivelAtual");
-      const nivel = nivelString ? parseInt(nivelString) : 1;
+      const nivel = /*nivelString ? Number(nivelString) :*/ 1;
       router.replace(`/exercicio/${nivel}`);
     };
     redirecionar();

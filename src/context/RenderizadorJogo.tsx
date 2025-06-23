@@ -17,6 +17,8 @@ import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { TextInput } from "react-native";
+import { getExercicioById } from "../service/ExercicioService";
+
 export interface JogoProps {
     exercicio: Exercicio;
     linhas: number;
@@ -30,6 +32,58 @@ export interface JogoProps {
     verificarProximoExercicio?: (nivel: number) => Promise<boolean>;
 }
 
+//Temas personalizados
+const temasDeCore = [
+    {
+        nome: 'Rosa',
+        fundo: 'pink',
+        botoes: '#CDB4DB',
+        casaClara: '#FFF1F8',
+        casaEscura: '#CDB4DB'
+    },
+    {
+        nome: 'Azul',
+        fundo: '#E3F2FD',
+        botoes: '#64B5F6',
+        casaClara: '#F3E5F5',
+        casaEscura: '#64B5F6'
+    },
+    {
+        nome: 'Verde',
+        fundo: '#E8F5E8',
+        botoes: '#81C784',
+        casaClara: '#F1F8E9',
+        casaEscura: '#81C784'
+    },
+    {
+        nome: 'Roxo',
+        fundo: '#F3E5F5',
+        botoes: '#BA68C8',
+        casaClara: '#FCE4EC',
+        casaEscura: '#BA68C8'
+    },
+    {
+        nome: 'Laranja',
+        fundo: '#FFF3E0',
+        botoes: '#FFB74D',
+        casaClara: '#FFF8E1',
+        casaEscura: '#FFB74D'
+    },
+    {
+        nome: 'Ciano',
+        fundo: '#E0F2F1',
+        botoes: '#4DB6AC',
+        casaClara: '#E8F5E8',
+        casaEscura: '#4DB6AC'
+    }
+];
+
+// Função para escolher tema aleatório
+const escolherTemaAleatorio = () => {
+    const indiceAleatorio = Math.floor(Math.random() * temasDeCore.length);
+    return temasDeCore[indiceAleatorio];
+};
+
 export function Jogo({
     exercicio,
     linhas,
@@ -42,10 +96,11 @@ export function Jogo({
 }: JogoProps) {
     const router = useRouter();
 
-    //Aqui é uma atualização do tamanho das casas e tabuleiro, caso ele tenha que ser maior
+    //Aqui é uma atualização do tamanho das casas e tabuleiro, caso ele tenha que ser maior e adicionando as cores tema
     const { width, height } = Dimensions.get('window');
     const tamanhoTabuleiro = Math.min(width * 0.95, height * 0.5);
     const tamanhoCasa = tamanhoTabuleiro / Math.max(linhas, colunas);
+    const [temaAtual] = useState(() => escolherTemaAleatorio());
 
     const estilosDinamicos = StyleSheet.create({
         casa: {
@@ -63,6 +118,24 @@ export function Jogo({
             alignSelf: 'center',
             justifyContent: "center"
         },
+
+        containerTematico: {
+            flex: 1,
+            width: 700,
+            height: 700,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: temaAtual.fundo,
+        },
+        botaoTematico: {
+            backgroundColor: temaAtual.botoes,
+        },
+        casaClaraTematica: {
+            backgroundColor: temaAtual.casaClara,
+        },
+        casaEscuraTematica: {
+            backgroundColor: temaAtual.casaEscura,
+        }
     });
 
     const [tabuleiro, setTabuleiro] = useState<EstadoTabuleiro>(new Map());
@@ -71,7 +144,7 @@ export function Jogo({
     const [indiceJogada, setIndiceJogada] = useState(0);
     const [historico, setHistorico] = useState<EstadoTabuleiro[]>([]);
     const [reiDerrotado, setReiDerrotado] = useState<{ cor: 'branco' | 'preto' } | null>(null);
-    const [temProximoExercicio, setTemProximoExercicio] = useState<boolean>(false);
+    const [temProximoExercicio, setTemProximoExercicio] = useState<boolean | null>(null); // Mudança aqui: null para indicar "não verificado ainda"
     const [verificandoProximo, setVerificandoProximo] = useState<boolean>(false);
     const [comentando, setComentando] = useState(false);
     const [comentarioTexto, setComentarioTexto] = useState("");
@@ -86,21 +159,15 @@ export function Jogo({
 
     const podeVoltarLance = historico.length > 1 && statusJogo === 'jogando';
 
-    // Função para verificar se existe próximo exercício
-    const verificarSeTemProximoExercicio = useCallback(async () => {
-        if (verificarProximoExercicio && statusJogo === 'ganhou') {
-            setVerificandoProximo(true);
-            try {
-                const temProximo = await verificarProximoExercicio(nivel + 1);
-                setTemProximoExercicio(temProximo);
-            } catch (error) {
-                console.error('Erro ao verificar próximo exercício:', error);
-                setTemProximoExercicio(false);
-            } finally {
-                setVerificandoProximo(false);
-            }
-        }
-    }, [verificarProximoExercicio, nivel, statusJogo]);
+    // Função para verificar se existe próximo exercício - CORRIGIDA
+    const verificarSeTemProximoExercicio = useCallback(() => {
+        const temExercicio = getExercicioById(nivel + 1);
+        const resultado = !!temExercicio;
+
+        setTemProximoExercicio(resultado);
+
+        return resultado;
+    }, [nivel]);
 
     // Função para navegar para o próximo exercício
     const irParaProximoExercicio = useCallback(() => {
@@ -126,10 +193,15 @@ export function Jogo({
         iniciarOuResetarJogo();
     }, [exercicio.posicaoInicial, exercicio.posicoes]);
 
-    // Verificar próximo exercício quando o jogo é ganho
+    // Verificar próximo exercício quando o jogo é ganho - CORRIGIDO
     useEffect(() => {
         if (statusJogo === 'ganhou') {
-            verificarSeTemProximoExercicio();
+            // Adiciona um pequeno delay para garantir que o estado foi atualizado
+            const timer = setTimeout(() => {
+                verificarSeTemProximoExercicio();
+            }, 100);
+
+            return () => clearTimeout(timer);
         }
     }, [statusJogo, verificarSeTemProximoExercicio]);
 
@@ -141,7 +213,7 @@ export function Jogo({
         setStatusJogo('jogando');
         setPecaSelecionada(null);
         setReiDerrotado(null);
-        setTemProximoExercicio(false);
+        setTemProximoExercicio(null); // Reset para null ao reiniciar
         setVerificandoProximo(false);
     }, [exercicio.posicaoInicial]);
 
@@ -261,7 +333,6 @@ export function Jogo({
         setIndiceJogada(prev => Math.max(0, prev - 1));
         setStatusJogo('jogando');
         setPecaSelecionada(null);
-        // Reset do rei derrotado ao voltar lance
         setReiDerrotado(null);
     }, [historico, statusJogo]);
 
@@ -308,12 +379,17 @@ export function Jogo({
             pecaSelecionada?.linha === casa.linha &&
             pecaSelecionada?.coluna === casa.coluna;
 
+        // Determina a cor da casa baseada na posição e tema atual
+        const corCasa = (i + j) % 2 === 0 ?
+            estilosDinamicos.casaClaraTematica :
+            estilosDinamicos.casaEscuraTematica;
+
         return (
             <View
                 key={`${i}-${j}`}
                 style={[
                     (linhas > 6 || colunas > 6) ? estilosDinamicos.casa : styles.casa,
-                    { backgroundColor: (i + j) % 2 === 0 ? '#FFF1F8' : '#CDB4DB' },
+                    corCasa,
                     isSelecionada && styles.casaSelecionada,
                     destinoPossivel && styles.casaDestino,
                 ]}
@@ -358,7 +434,8 @@ export function Jogo({
         statusJogo,
         processarClique,
         lancesDaPecaSelecionada,
-        obterImagemPeca
+        obterImagemPeca,
+        estilosDinamicos
     ]);
 
     const toggleComentando = () => {
@@ -375,7 +452,7 @@ export function Jogo({
         <View style={styles.containerComentar}>
             {!comentando ? (
                 <TouchableOpacity
-                    style={styles.botaoComentar}
+                    style={[styles.botaoComentar, estilosDinamicos.botaoTematico]}
                     onPress={toggleComentando}
                 >
                     <Text style={styles.textoBotaoComentar}>Comentar</Text>
@@ -393,14 +470,14 @@ export function Jogo({
                     />
                     <View style={styles.botoesComentarioContainer}>
                         <TouchableOpacity
-                            style={[styles.botaoComentar, styles.botaoEnviar]}
+                            style={[styles.botaoComentar, styles.botaoEnviar, estilosDinamicos.botaoTematico]}
                             onPress={enviarComentario}
                             disabled={comentarioTexto.trim() === ""}
                         >
                             <Text style={styles.textoBotaoComentar}>Enviar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.botaoComentar, styles.botaoCancelar]}
+                            style={[styles.botaoComentar, styles.botaoCancelar, estilosDinamicos.botaoTematico]}
                             onPress={() => {
                                 setComentarioTexto("");
                                 setComentando(false);
@@ -415,18 +492,10 @@ export function Jogo({
     );
 
     const renderizarBotaoProximo = () => {
-        if (verificandoProximo) {
-            return (
-                <TouchableOpacity style={[styles.botaoProximo, styles.botaoCarregando]} disabled>
-                    <Text style={styles.textoBotaoProximo}>Verificando...</Text>
-                </TouchableOpacity>
-            );
-        }
-
-        if (temProximoExercicio) {
+        if (temProximoExercicio === true) {
             return (
                 <TouchableOpacity
-                    style={styles.botaoProximo}
+                    style={[styles.botaoProximo, estilosDinamicos.botaoTematico]}
                     onPress={irParaProximoExercicio}
                 >
                     <Text style={styles.textoBotaoProximo}>Próximo</Text>
@@ -434,30 +503,34 @@ export function Jogo({
             );
         }
 
+        if (temProximoExercicio === false) {
+            return (
+                <View style={styles.containerFinal}>
+                    <View style={[styles.botaoProximo, styles.botaoDesabilitado]}>
+                        <Text style={styles.textoBotaoDesabilitado}>
+                            No momento não há mais exercícios disponíveis...
+                        </Text>
+                    </View>
+                    <View style={styles.containerExtras}>
+                        <View>{renderizarBotaoComentar()}</View>
+                    </View>
+                </View>
+            );
+        }
+
         return (
             <View style={styles.containerFinal}>
                 <View style={[styles.botaoProximo, styles.botaoDesabilitado]}>
                     <Text style={styles.textoBotaoDesabilitado}>
-                        No momento não há mais exercícios disponíveis...
+                        Carregando...
                     </Text>
-
-                </View>
-                <View style={styles.containerExtras}>
-                    <TouchableOpacity onPress={iniciarOuResetarJogo}>
-                        <Text style={styles.textoBotaoNovo}>
-                            Reiniciar
-                        </Text>
-                    </TouchableOpacity>
-
-                    <View>{renderizarBotaoComentar()}</View>
                 </View>
             </View>
         );
     };
 
     return (
-        <View style={styles.container}>
-
+        <View style={estilosDinamicos.containerTematico}>
             {/* Informações do jogo */}
             <View style={styles.infoJogo}>
                 <Text style={styles.infoTexto}>
@@ -481,7 +554,11 @@ export function Jogo({
             {statusJogo === 'jogando' || statusJogo === 'perdeu' ? (
                 <View style={styles.controles}>
                     <TouchableOpacity
-                        style={[styles.botaoVoltar, !podeVoltarLance && styles.botaoDesabilitado]}
+                        style={[
+                            styles.botaoVoltar,
+                            estilosDinamicos.botaoTematico,
+                            !podeVoltarLance && styles.botaoDesabilitado
+                        ]}
                         onPress={voltarLance}
                         disabled={!podeVoltarLance}
                     >
@@ -489,7 +566,7 @@ export function Jogo({
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.botaoReiniciar}
+                        style={[styles.botaoReiniciar, estilosDinamicos.botaoTematico]}
                         onPress={iniciarOuResetarJogo}
                     >
                         <Text style={styles.textoBotao}>
