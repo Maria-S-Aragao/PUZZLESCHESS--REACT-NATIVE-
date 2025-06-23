@@ -1,5 +1,6 @@
 import { JogoProps } from "../context/RenderizadorJogo";
 import { PuzzleOne } from "./PuzzleOne";
+import { PuzzleThree } from "./PuzzleThree";
 import { PuzzleTwo } from "./PuzzleTwo";
 
 export const Exercicios: (JogoProps & { id: number })[] = [
@@ -20,6 +21,17 @@ export const Exercicios: (JogoProps & { id: number })[] = [
         linhas: 4,
         colunas: 2,
         nivel: 2,
+        mate: 1, 
+        corJogador: "branco",
+        corAdversario: "preto",
+    },
+
+    {
+        id: 3,
+        exercicio: PuzzleThree(),
+        linhas: 4,
+        colunas: 3,
+        nivel: 3,
         mate: 1, 
         corJogador: "branco",
         corAdversario: "preto",

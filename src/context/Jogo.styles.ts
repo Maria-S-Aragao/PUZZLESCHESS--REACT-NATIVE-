@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
     },
 
     botaoDesabilitado: {
-        backgroundColor: '#ccc',
+        backgroundColor: "#47414F",
         opacity: 0.5,
     },
 
@@ -128,18 +128,33 @@ export const styles = StyleSheet.create({
     },
 
     infoJogo: {
-        width: 350,
-        bottom: 100,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 60,
+
         paddingHorizontal: 10,
         paddingVertical: 8,
-        backgroundColor: '#f5f5f5',
+
+        backgroundColor: 'transparent', 
+
+        borderTopWidth: 8,             
+        borderTopColor: '#ccc',         
+
+        zIndex: 999,
         borderRadius: 5,
         marginBottom: 10,
+
+        minHeight:150,
         alignItems: 'center',
+        flexDirection: 'column',
+        justifyContent: 'center',
     },
 
     infoTexto: {
-        fontSize: 14,
+        fontFamily: 'Caprasimo_400Regular',
+        fontSize: 30,
         color: '#333',
         textAlign: 'center',
     },
@@ -166,7 +181,7 @@ export const styles = StyleSheet.create({
     },
 
     textoBotaoDesabilitado: {
-        color: '#9E9E9E',
+        color: "#47414F",
         fontSize: 14,
         textAlign: 'center',
         lineHeight: 18,
@@ -188,7 +203,7 @@ export const styles = StyleSheet.create({
     },
 
     botaoComentar: {
-        backgroundColor: '#CDB4DB', 
+        backgroundColor: '#CDB4DB',
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 8,
@@ -203,7 +218,7 @@ export const styles = StyleSheet.create({
     },
 
     botaoCancelar: {
-        backgroundColor: '#CDB4DB', 
+        backgroundColor: '#CDB4DB',
         paddingHorizontal: 20,
     },
 
@@ -243,8 +258,13 @@ export const styles = StyleSheet.create({
     containerExtras: {
         flexDirection: "row",
         gap: 15
-    }
+    },
 
+    opcoes: {
+        tintColor: "#47414F",
+        height: 50,
+        width: 50
+    }
 });
 
 

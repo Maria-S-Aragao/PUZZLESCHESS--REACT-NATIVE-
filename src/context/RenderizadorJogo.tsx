@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Casa } from "../types/Casa";
 import { Exercicio } from "../types/Exercicio";
 import { EstadoTabuleiro } from "../types/EstadoTabuleiro"
@@ -15,9 +15,10 @@ import * as Pecas from "../constants/Pecas"
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { TextInput } from "react-native";
 import { getExercicioById } from "../service/ExercicioService";
+import ExposicaoExercicio from "../../app/ExposicaoExercicios";
 
 export interface JogoProps {
     exercicio: Exercicio;
@@ -100,7 +101,11 @@ export function Jogo({
     const { width, height } = Dimensions.get('window');
     const tamanhoTabuleiro = Math.min(width * 0.95, height * 0.5);
     const tamanhoCasa = tamanhoTabuleiro / Math.max(linhas, colunas);
-    const [temaAtual] = useState(() => escolherTemaAleatorio());
+    const [temaAtual, setTemaAtual] = useState(escolherTemaAleatorio());
+
+    useEffect(() => {
+        setTemaAtual(escolherTemaAleatorio());
+    }, [exercicio]);
 
     const estilosDinamicos = StyleSheet.create({
         casa: {
@@ -144,40 +149,34 @@ export function Jogo({
     const [indiceJogada, setIndiceJogada] = useState(0);
     const [historico, setHistorico] = useState<EstadoTabuleiro[]>([]);
     const [reiDerrotado, setReiDerrotado] = useState<{ cor: 'branco' | 'preto' } | null>(null);
-    const [temProximoExercicio, setTemProximoExercicio] = useState<boolean | null>(null); // Mudança aqui: null para indicar "não verificado ainda"
+    const [temProximoExercicio, setTemProximoExercicio] = useState<boolean | null>(null);
     const [verificandoProximo, setVerificandoProximo] = useState<boolean>(false);
     const [comentando, setComentando] = useState(false);
     const [comentarioTexto, setComentarioTexto] = useState("");
 
-    const tabuleiroGrid = useMemo(() => GeradorTabuleiroGrid(linhas, colunas), [linhas, colunas]);
-
-    const encontrarPecaCallback = useCallback((casa: Casa) => encontrarPeca(tabuleiro, casa), [tabuleiro]);
-
-    const posicaoAtual = useMemo(() => exercicio.posicoes[indiceJogada], [exercicio.posicoes, indiceJogada]);
-
-    const copiarTabuleiro = useCallback((origem: EstadoTabuleiro): EstadoTabuleiro => { return new Map(origem); }, []);
-
+    const tabuleiroGrid = GeradorTabuleiroGrid(linhas, colunas);
+    const posicaoAtual = exercicio.posicoes[indiceJogada];
     const podeVoltarLance = historico.length > 1 && statusJogo === 'jogando';
 
-    // Função para verificar se existe próximo exercício - CORRIGIDA
-    const verificarSeTemProximoExercicio = useCallback(() => {
+    const encontrarPecaCallback = (casa: Casa) => encontrarPeca(tabuleiro, casa);
+    const copiarTabuleiro = (origem: EstadoTabuleiro): EstadoTabuleiro => new Map(origem);
+
+    // Função para verificar se existe próximo exercício
+    const verificarSeTemProximoExercicio = () => {
         const temExercicio = getExercicioById(nivel + 1);
         const resultado = !!temExercicio;
-
         setTemProximoExercicio(resultado);
-
         return resultado;
-    }, [nivel]);
+    };
 
     // Função para navegar para o próximo exercício
-    const irParaProximoExercicio = useCallback(() => {
+    const irParaProximoExercicio = () => {
         if (temProximoExercicio) {
             router.push(`/exercicio/${nivel + 1}`);
         }
-    }, [temProximoExercicio, nivel, router]);
+    };
 
-    const obterImagemPeca = useCallback((peca: Peca): any => {
-
+    const obterImagemPeca = (peca: Peca): any => {
         if (reiDerrotado && peca.nome === 'rei' && peca.cor === reiDerrotado.cor) {
             if (peca.cor === 'branco') {
                 return Pecas.ReiBrancoMorto.imagem;
@@ -185,27 +184,10 @@ export function Jogo({
                 return Pecas.ReiPretoMorto.imagem;
             }
         }
-
         return peca.imagem;
-    }, [reiDerrotado]);
+    };
 
-    useEffect(() => {
-        iniciarOuResetarJogo();
-    }, [exercicio.posicaoInicial, exercicio.posicoes]);
-
-    // Verificar próximo exercício quando o jogo é ganho - CORRIGIDO
-    useEffect(() => {
-        if (statusJogo === 'ganhou') {
-            // Adiciona um pequeno delay para garantir que o estado foi atualizado
-            const timer = setTimeout(() => {
-                verificarSeTemProximoExercicio();
-            }, 100);
-
-            return () => clearTimeout(timer);
-        }
-    }, [statusJogo, verificarSeTemProximoExercicio]);
-
-    const iniciarOuResetarJogo = useCallback(() => {
+    const iniciarOuResetarJogo = () => {
         const estadoInicial = posicaoToEstadoTabuleiro(exercicio.posicaoInicial);
         setTabuleiro(estadoInicial);
         setHistorico([estadoInicial]);
@@ -213,11 +195,11 @@ export function Jogo({
         setStatusJogo('jogando');
         setPecaSelecionada(null);
         setReiDerrotado(null);
-        setTemProximoExercicio(null); // Reset para null ao reiniciar
+        setTemProximoExercicio(null);
         setVerificandoProximo(false);
-    }, [exercicio.posicaoInicial]);
+    };
 
-    const executarResposta = useCallback((
+    const executarResposta = (
         novoTabuleiro: EstadoTabuleiro,
         resposta: Lance['resposta']
     ): void => {
@@ -239,9 +221,9 @@ export function Jogo({
             casa: resposta.casa_final,
             peca: resposta.peca
         });
-    }, []);
+    };
 
-    const atualizarStatusJogo = useCallback(async (finalizacao?: Lance['finalizacao']): Promise<void> => {
+    const atualizarStatusJogo = async (finalizacao?: Lance['finalizacao']): Promise<void> => {
         if (finalizacao === 'ganhou') {
             setStatusJogo('ganhou');
             setReiDerrotado({ cor: corAdversario });
@@ -257,9 +239,9 @@ export function Jogo({
             setStatusJogo('jogando');
             setReiDerrotado(null);
         }
-    }, []);
+    };
 
-    const moverPecaPara = useCallback((casaDestino: Casa) => {
+    const moverPecaPara = async (casaDestino: Casa) => {
         if (!pecaSelecionada || statusJogo !== 'jogando') return;
 
         const lancesPossiveis = obterLancesDasJogadas(posicaoAtual.jogadas);
@@ -296,19 +278,10 @@ export function Jogo({
         setHistorico(prev => [...prev, novoTabuleiro]);
         setPecaSelecionada(null);
         setIndiceJogada(prev => prev + 1);
-        atualizarStatusJogo(lance.finalizacao);
-    }, [
-        pecaSelecionada,
-        statusJogo,
-        posicaoAtual,
-        encontrarPecaCallback,
-        copiarTabuleiro,
-        tabuleiro,
-        executarResposta,
-        atualizarStatusJogo
-    ]);
+        await atualizarStatusJogo(lance.finalizacao);
+    };
 
-    const jogadasDaPecaSelecionada = useMemo((): Jogada[] => {
+    const getJogadasDaPecaSelecionada = (): Jogada[] => {
         if (!pecaSelecionada || !posicaoAtual) return [];
 
         return posicaoAtual.jogadas.filter(jogada =>
@@ -317,13 +290,13 @@ export function Jogo({
                 lance.casa_inicial.coluna === pecaSelecionada.coluna
             )
         );
-    }, [pecaSelecionada, posicaoAtual]);
+    };
 
-    const lancesDaPecaSelecionada = useMemo((): Lance[] => {
-        return obterLancesDasJogadas(jogadasDaPecaSelecionada);
-    }, [jogadasDaPecaSelecionada]);
+    const getLancesDaPecaSelecionada = (): Lance[] => {
+        return obterLancesDasJogadas(getJogadasDaPecaSelecionada());
+    };
 
-    const voltarLance = useCallback(() => {
+    const voltarLance = () => {
         if (historico.length <= 1 || statusJogo !== 'jogando') return;
 
         const novoHistorico = [...historico];
@@ -334,12 +307,13 @@ export function Jogo({
         setStatusJogo('jogando');
         setPecaSelecionada(null);
         setReiDerrotado(null);
-    }, [historico, statusJogo]);
+    };
 
-    const processarClique = useCallback((casa: Casa) => {
+    const processarClique = (casa: Casa) => {
         if (statusJogo !== 'jogando') return;
 
         const pecaNaCasa = encontrarPecaCallback(casa);
+        const lancesDaPecaSelecionada = getLancesDaPecaSelecionada();
 
         // Se ainda não há peça selecionada
         if (!pecaSelecionada) {
@@ -364,16 +338,11 @@ export function Jogo({
 
         // Se clicou em qualquer outra coisa, cancela a seleção
         setPecaSelecionada(null);
-    }, [
-        statusJogo,
-        encontrarPecaCallback,
-        pecaSelecionada,
-        moverPecaPara,
-        lancesDaPecaSelecionada
-    ]);
+    };
 
-    const renderizarCasa = useCallback((casa: Casa, i: number, j: number) => {
+    const renderizarCasa = (casa: Casa, i: number, j: number) => {
         const pecaNaCasa = encontrarPecaCallback(casa);
+        const lancesDaPecaSelecionada = getLancesDaPecaSelecionada();
         const destinoPossivel = ehCasaDestinoPossivel(casa, lancesDaPecaSelecionada);
         const isSelecionada =
             pecaSelecionada?.linha === casa.linha &&
@@ -428,15 +397,22 @@ export function Jogo({
                 )}
             </View>
         );
-    }, [
-        encontrarPecaCallback,
-        pecaSelecionada,
-        statusJogo,
-        processarClique,
-        lancesDaPecaSelecionada,
-        obterImagemPeca,
-        estilosDinamicos
-    ]);
+    };
+
+    useEffect(() => {
+        iniciarOuResetarJogo();
+    }, [exercicio.posicaoInicial, exercicio.posicoes]);
+
+    // Verificar próximo exercício quando o jogo é ganho
+    useEffect(() => {
+        if (statusJogo === 'ganhou') {
+            const timer = setTimeout(() => {
+                verificarSeTemProximoExercicio();
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [statusJogo]);
 
     const toggleComentando = () => {
         setComentando(prev => !prev);
