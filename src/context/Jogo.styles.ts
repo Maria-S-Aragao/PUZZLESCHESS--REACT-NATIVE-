@@ -2,8 +2,8 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
     casa: {
-        width: 90,
-        height: 90,
+        width: 100,
+        height: 100,
         justifyContent: "center",
         alignItems: "center",
     },
@@ -21,19 +21,26 @@ export const styles = StyleSheet.create({
         height: 60,
     },
 
+    componentDasBolinhas: {
+        position: "relative",
+    },
+
     bolinhaDestino: {
-        width: 30,
-        height: 30,
-        borderRadius: 16,
-        backgroundColor: "rgba(0, 0, 0, 0.22)",
+        width: 50,
+        height: 50,
+        borderRadius: 10,
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
     },
 
     bolinhaDestinoGrandes: {
         position: "absolute",
-        width: 60,
-        height: 60,
-        borderRadius: 32,
-        backgroundColor: "rgba(0, 0, 0, 0.22)",
+        width: 70,
+        height: 70,
+        borderRadius: 10,
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
+        top: "50%",
+        left: "60%",
+        transform: [{ translateX: -65 }, { translateY: -35 }], 
     },
 
     casaVazia: {
@@ -43,8 +50,12 @@ export const styles = StyleSheet.create({
 
     container: {
         flex: 1,
+        width: 700,
+        height: 700,
         justifyContent: "center",
-        alignContent: "center"
+        alignItems: "center",
+        paddingVertical: 10,
+        backgroundColor: "black",
     },
 
     linha: {
@@ -70,23 +81,29 @@ export const styles = StyleSheet.create({
 
     controles: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginVertical: 10,
-        gap: 10,
+        justifyContent: 'center',
+        marginTop: 10,
+        marginBottom: 20,
+        gap: 50,
+        top: 50
     },
 
     botaoVoltar: {
-        backgroundColor: '#555',
-        padding: 10,
-        borderRadius: 5,
-        flex: 1,
+        height: 80,
+        width: 80,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: '#CDB4DB',
+        borderRadius: 200,
     },
 
     botaoReiniciar: {
-        backgroundColor: '#4CAF50',
-        padding: 10,
-        borderRadius: 5,
-        flex: 1,
+        height: 80,
+        width: 80,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: '#CDB4DB',
+        borderRadius: 200,
     },
 
     botaoDesabilitado: {
@@ -101,16 +118,20 @@ export const styles = StyleSheet.create({
     },
 
     infoJogo: {
+        width: 350,
+        bottom: 100,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
         backgroundColor: '#f5f5f5',
-        padding: 8,
         borderRadius: 5,
         marginBottom: 10,
+        alignItems: 'center',
     },
 
     infoTexto: {
-        textAlign: 'center',
         fontSize: 14,
         color: '#333',
+        textAlign: 'center',
     },
 
     tabuleiroContainer: {
@@ -118,3 +139,5 @@ export const styles = StyleSheet.create({
     },
 
 });
+
+

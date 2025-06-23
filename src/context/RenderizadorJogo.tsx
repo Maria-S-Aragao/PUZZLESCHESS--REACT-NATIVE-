@@ -7,21 +7,48 @@ import { casaToString, encontrarPeca, posicaoToEstadoTabuleiro } from "../util/T
 import { StatusJogo } from "../types/StatusJogo";
 import { GeradorTabuleiroGrid } from "../functions/GeradorTabuleiro";
 import { Lance } from "../types/Lance";
-import { TouchableOpacity, View, Image, Text } from "react-native";
+import { TouchableOpacity, View, Image, Text, Dimensions } from "react-native";
 import { ehCasaDestinoPossivel, obterLancesDasJogadas } from "../functions/Jogadas";
 import { Jogada } from "../types/Jogada";
 import { styles } from "./Jogo.styles";
 import { Peca } from "../types/Peca";
 import * as Pecas from "../constants/Pecas"
-import Entypo from '@expo/vector-icons/Entypo';
+import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
+import { StyleSheet } from "react-native";
 
 interface JogoProps {
     exercicio: Exercicio;
     linhas: number;
     colunas: number;
+    nivel: string,
+    mate: string,
+    corJogador: "branco" | "preto",
+    corAdversario: "branco" | "preto"
 }
 
-export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
+export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, corJogador }: JogoProps) {
+    //Aqui é uma atualização do tamanho das casas e tabuleiro, caso ele tenha que ser maior
+    const { width, height } = Dimensions.get('window');
+    const tamanhoTabuleiro = Math.min(width * 0.95, height * 0.5);
+    const tamanhoCasa = tamanhoTabuleiro / Math.max(linhas, colunas);
+
+    const estilosDinamicos = StyleSheet.create({
+        casa: {
+            width: tamanhoCasa,
+            height: tamanhoCasa,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        linha: {
+            flexDirection: 'row',
+        },
+        tabuleiroContainer: {
+            width: tamanhoTabuleiro,
+            height: tamanhoTabuleiro,
+            alignSelf: 'center',
+            justifyContent: "center"
+        },
+    });
 
     const [tabuleiro, setTabuleiro] = useState<EstadoTabuleiro>(new Map());
     const [pecaSelecionada, setPecaSelecionada] = useState<Casa | null>(null);
@@ -41,9 +68,8 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
     const podeVoltarLance = historico.length > 1 && statusJogo === 'jogando';
 
 
-    // Função para obter a imagem correta da peça baseada no resultado do jogo
     const obterImagemPeca = useCallback((peca: Peca): any => {
-        // Se um rei foi derrotado (xeque-mate) e esta peça é o rei derrotado, mostrar versão morta
+
         if (reiDerrotado && peca.nome === 'rei' && peca.cor === reiDerrotado.cor) {
             if (peca.cor === 'branco') {
                 return Pecas.ReiBrancoMorto.imagem;
@@ -52,7 +78,6 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
             }
         }
 
-        // Caso contrário, retorna a imagem normal
         return peca.imagem;
     }, [reiDerrotado]);
 
@@ -94,14 +119,13 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
         });
     }, []);
 
-    //Tem que alterar de acordo com a l
     const atualizarStatusJogo = useCallback((finalizacao?: Lance['finalizacao']): void => {
         if (finalizacao === 'ganhou') {
             setStatusJogo('ganhou');
-            setReiDerrotado({ cor: 'preto' });
+            setReiDerrotado({ cor: corAdversario });
         } else if (finalizacao === 'perdeu') {
             setStatusJogo('perdeu');
-            setReiDerrotado({ cor: 'branco' });
+            setReiDerrotado({ cor: corJogador });
         } else {
             setStatusJogo('jogando');
             setReiDerrotado(null);
@@ -233,7 +257,7 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
             <View
                 key={`${i}-${j}`}
                 style={[
-                    styles.casa,
+                    (linhas > 6 || colunas > 6) ? estilosDinamicos.casa : styles.casa,
                     { backgroundColor: (i + j) % 2 === 0 ? '#FFF1F8' : '#CDB4DB' },
                     isSelecionada && styles.casaSelecionada,
                     destinoPossivel && styles.casaDestino,
@@ -254,7 +278,7 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
                         )}
 
                         <Image
-                            source={obterImagemPeca(pecaNaCasa.peca)} // Usando a nova função aqui
+                            source={obterImagemPeca(pecaNaCasa.peca)}
                             style={styles.imagemPeca}
                         />
                     </TouchableOpacity>
@@ -288,14 +312,17 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
             {/* Informações do jogo */}
             <View style={styles.infoJogo}>
                 <Text style={styles.infoTexto}>
-                    Jogada: {indiceJogada + 1} | Status: {statusJogo}
+                    Nivel {nivel}
+                </Text>
+                <Text style={styles.infoTexto}>
+                    Mate em {mate}
                 </Text>
             </View>
 
             {/* Tabuleiro */}
-            <View style={styles.tabuleiroContainer}>
+            <View style={linhas > 6 || colunas > 6 ? estilosDinamicos.tabuleiroContainer : styles.tabuleiroContainer}>
                 {tabuleiroGrid.map((linhaCasas, i) => (
-                    <View key={i} style={styles.linha}>
+                    <View key={i} style={linhas > 6 || colunas > 6 ? estilosDinamicos.linha : styles.linha}>
                         {linhaCasas.map((casa, j) => renderizarCasa(casa, i, j))}
                     </View>
                 ))}
@@ -304,21 +331,18 @@ export function Jogo({ exercicio, linhas, colunas }: JogoProps) {
             {/* Controles do jogo */}
             <View style={styles.controles}>
                 <TouchableOpacity
-                    style={[
-                        styles.botaoVoltar,
-                        !podeVoltarLance && styles.botaoDesabilitado
-                    ]}
+                    style={[styles.botaoVoltar, !podeVoltarLance && styles.botaoDesabilitado]}
                     onPress={voltarLance}
                     disabled={!podeVoltarLance}
                 >
-                    <Text style={styles.textoBotao}>↩️ Voltar Lance</Text>
+                    <AntDesign name="arrowleft" size={24} color="#2D2A31" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.botaoReiniciar}
                     onPress={iniciarOuResetarJogo}
                 >
-                    <Text style={styles.textoBotao}>🔄 Reiniciar</Text>
+                    <Text style={styles.textoBotao}><SimpleLineIcons name="reload" size={30} color="#2D2A31" /></Text>
                 </TouchableOpacity>
             </View>
         </View>
