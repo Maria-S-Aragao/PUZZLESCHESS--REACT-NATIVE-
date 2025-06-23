@@ -1,6 +1,15 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        width: 700,
+        height: 700,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "pink",
+    },
+
     casa: {
         width: 100,
         height: 100,
@@ -40,22 +49,12 @@ export const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 0, 0, 0.1)",
         top: "50%",
         left: "60%",
-        transform: [{ translateX: -65 }, { translateY: -35 }], 
+        transform: [{ translateX: -65 }, { translateY: -35 }],
     },
 
     casaVazia: {
         width: "100%",
         height: "100%",
-    },
-
-    container: {
-        flex: 1,
-        width: 700,
-        height: 700,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 10,
-        backgroundColor: "black",
     },
 
     linha: {
@@ -117,6 +116,17 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 
+    textoBotaoNovo: {
+        fontSize: 15,
+        textAlign: "center",
+        height: 25,
+        width: 200,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: '#CDB4DB',
+        borderRadius: 30,
+    },
+
     infoJogo: {
         width: 350,
         bottom: 100,
@@ -138,6 +148,104 @@ export const styles = StyleSheet.create({
         alignSelf: 'center',
     },
 
+    botaoProximo: {
+        backgroundColor: '#CDB4DB',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+        minWidth: 200,
+    },
+
+    textoBotaoProximo: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
+    botaoCarregando: {
+        backgroundColor: '#CDB4DB',
+    },
+
+    textoBotaoDesabilitado: {
+        color: '#9E9E9E',
+        fontSize: 14,
+        textAlign: 'center',
+        lineHeight: 18,
+    },
+
+    containerFinal: {
+        gap: 30,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    containerComentar: {
+        marginTop: 10,
+        alignItems: "center",
+        width: '100%',
+    },
+
+    botaoComentar: {
+        backgroundColor: '#CDB4DB', 
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 200,
+    },
+
+    botaoEnviar: {
+        backgroundColor: '#CDB4DB',
+        paddingHorizontal: 20,
+    },
+
+    botaoCancelar: {
+        backgroundColor: '#CDB4DB', 
+        paddingHorizontal: 20,
+    },
+
+    textoBotaoComentar: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
+    inputComentario: {
+        width: 300,
+        minHeight: 80,
+        maxHeight: 120,
+        borderColor: '#CDB4DB',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        backgroundColor: 'white',
+        textAlignVertical: 'top',
+        fontSize: 14,
+        color: '#333',
+    },
+
+    keyboardAvoiding: {
+        width: '100%',
+        alignItems: 'center',
+    },
+
+    botoesComentarioContainer: {
+        flexDirection: 'row',
+        marginTop: 8,
+        justifyContent: 'center',
+        gap: 10,
+    },
+
+    containerExtras: {
+        flexDirection: "column",
+    }
+
 });
+
 
 

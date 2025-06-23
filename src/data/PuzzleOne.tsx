@@ -4,7 +4,7 @@ import { Posicao } from "../types/Posicao";
 import { PosicaoInicial } from "../types/PosicaoInicial";
 import * as Pecas from '../constants/Pecas';
 
-export function ContrucaoPuzzleOne(): Exercicio {
+export function PuzzleOne(): Exercicio {
     //Peças que serão utilizadas no exercício
     const { reiPreto, damaBranca, torrePreta } = Pecas;
 

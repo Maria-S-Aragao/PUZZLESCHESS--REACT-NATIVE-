@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Casa } from "../types/Casa";
 import { Exercicio } from "../types/Exercicio";
@@ -7,7 +6,7 @@ import { casaToString, encontrarPeca, posicaoToEstadoTabuleiro } from "../util/T
 import { StatusJogo } from "../types/StatusJogo";
 import { GeradorTabuleiroGrid } from "../functions/GeradorTabuleiro";
 import { Lance } from "../types/Lance";
-import { TouchableOpacity, View, Image, Text, Dimensions } from "react-native";
+import { TouchableOpacity, View, Image, Text, Dimensions, KeyboardAvoidingView } from "react-native";
 import { ehCasaDestinoPossivel, obterLancesDasJogadas } from "../functions/Jogadas";
 import { Jogada } from "../types/Jogada";
 import { styles } from "./Jogo.styles";
@@ -15,18 +14,34 @@ import { Peca } from "../types/Peca";
 import * as Pecas from "../constants/Pecas"
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { StyleSheet } from "react-native";
-
-interface JogoProps {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { TextInput } from "react-native";
+export interface JogoProps {
     exercicio: Exercicio;
     linhas: number;
     colunas: number;
-    nivel: string,
-    mate: string,
+    nivel: number,
+    mate: number,
     corJogador: "branco" | "preto",
-    corAdversario: "branco" | "preto"
+    corAdversario: "branco" | "preto",
+    onProximoNivel?: () => void;
+    // Adicionar função para verificar se existe próximo exercício
+    verificarProximoExercicio?: (nivel: number) => Promise<boolean>;
 }
 
-export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, corJogador }: JogoProps) {
+export function Jogo({
+    exercicio,
+    linhas,
+    colunas,
+    nivel,
+    mate,
+    corAdversario,
+    corJogador,
+    verificarProximoExercicio
+}: JogoProps) {
+    const router = useRouter();
+
     //Aqui é uma atualização do tamanho das casas e tabuleiro, caso ele tenha que ser maior
     const { width, height } = Dimensions.get('window');
     const tamanhoTabuleiro = Math.min(width * 0.95, height * 0.5);
@@ -56,6 +71,10 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
     const [indiceJogada, setIndiceJogada] = useState(0);
     const [historico, setHistorico] = useState<EstadoTabuleiro[]>([]);
     const [reiDerrotado, setReiDerrotado] = useState<{ cor: 'branco' | 'preto' } | null>(null);
+    const [temProximoExercicio, setTemProximoExercicio] = useState<boolean>(false);
+    const [verificandoProximo, setVerificandoProximo] = useState<boolean>(false);
+    const [comentando, setComentando] = useState(false);
+    const [comentarioTexto, setComentarioTexto] = useState("");
 
     const tabuleiroGrid = useMemo(() => GeradorTabuleiroGrid(linhas, colunas), [linhas, colunas]);
 
@@ -67,6 +86,28 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
 
     const podeVoltarLance = historico.length > 1 && statusJogo === 'jogando';
 
+    // Função para verificar se existe próximo exercício
+    const verificarSeTemProximoExercicio = useCallback(async () => {
+        if (verificarProximoExercicio && statusJogo === 'ganhou') {
+            setVerificandoProximo(true);
+            try {
+                const temProximo = await verificarProximoExercicio(nivel + 1);
+                setTemProximoExercicio(temProximo);
+            } catch (error) {
+                console.error('Erro ao verificar próximo exercício:', error);
+                setTemProximoExercicio(false);
+            } finally {
+                setVerificandoProximo(false);
+            }
+        }
+    }, [verificarProximoExercicio, nivel, statusJogo]);
+
+    // Função para navegar para o próximo exercício
+    const irParaProximoExercicio = useCallback(() => {
+        if (temProximoExercicio) {
+            router.push(`/exercicio/${nivel + 1}`);
+        }
+    }, [temProximoExercicio, nivel, router]);
 
     const obterImagemPeca = useCallback((peca: Peca): any => {
 
@@ -85,6 +126,13 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
         iniciarOuResetarJogo();
     }, [exercicio.posicaoInicial, exercicio.posicoes]);
 
+    // Verificar próximo exercício quando o jogo é ganho
+    useEffect(() => {
+        if (statusJogo === 'ganhou') {
+            verificarSeTemProximoExercicio();
+        }
+    }, [statusJogo, verificarSeTemProximoExercicio]);
+
     const iniciarOuResetarJogo = useCallback(() => {
         const estadoInicial = posicaoToEstadoTabuleiro(exercicio.posicaoInicial);
         setTabuleiro(estadoInicial);
@@ -92,7 +140,9 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
         setIndiceJogada(0);
         setStatusJogo('jogando');
         setPecaSelecionada(null);
-        setReiDerrotado(null); // Reset do rei derrotado
+        setReiDerrotado(null);
+        setTemProximoExercicio(false);
+        setVerificandoProximo(false);
     }, [exercicio.posicaoInicial]);
 
     const executarResposta = useCallback((
@@ -119,10 +169,15 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
         });
     }, []);
 
-    const atualizarStatusJogo = useCallback((finalizacao?: Lance['finalizacao']): void => {
+    const atualizarStatusJogo = useCallback(async (finalizacao?: Lance['finalizacao']): Promise<void> => {
         if (finalizacao === 'ganhou') {
             setStatusJogo('ganhou');
             setReiDerrotado({ cor: corAdversario });
+            const nivelAtualString = await AsyncStorage.getItem('nivelAtual');
+            const nivelAtual = nivelAtualString ? parseInt(nivelAtualString) : 0;
+            if (nivel > nivelAtual) {
+                AsyncStorage.setItem('nivelAtual', nivel.toString());
+            }
         } else if (finalizacao === 'perdeu') {
             setStatusJogo('perdeu');
             setReiDerrotado({ cor: corJogador });
@@ -303,8 +358,102 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
         statusJogo,
         processarClique,
         lancesDaPecaSelecionada,
-        obterImagemPeca // Adicionando a nova dependência
+        obterImagemPeca
     ]);
+
+    const toggleComentando = () => {
+        setComentando(prev => !prev);
+    };
+
+    const enviarComentario = () => {
+        console.log("Comentário enviado:", comentarioTexto);
+        setComentarioTexto("");
+        setComentando(false);
+    };
+
+    const renderizarBotaoComentar = () => (
+        <View style={styles.containerComentar}>
+            {!comentando ? (
+                <TouchableOpacity
+                    style={styles.botaoComentar}
+                    onPress={toggleComentando}
+                >
+                    <Text style={styles.textoBotaoComentar}>Comentar</Text>
+                </TouchableOpacity>
+            ) : (
+                <View>
+                    <TextInput
+                        style={styles.inputComentario}
+                        placeholder="Diga como foi sua experiência de jogo..."
+                        multiline
+                        maxLength={100}
+                        value={comentarioTexto}
+                        onChangeText={setComentarioTexto}
+                        autoFocus
+                    />
+                    <View style={styles.botoesComentarioContainer}>
+                        <TouchableOpacity
+                            style={[styles.botaoComentar, styles.botaoEnviar]}
+                            onPress={enviarComentario}
+                            disabled={comentarioTexto.trim() === ""}
+                        >
+                            <Text style={styles.textoBotaoComentar}>Enviar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.botaoComentar, styles.botaoCancelar]}
+                            onPress={() => {
+                                setComentarioTexto("");
+                                setComentando(false);
+                            }}
+                        >
+                            <Text style={styles.textoBotaoComentar}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+        </View>
+    );
+
+    const renderizarBotaoProximo = () => {
+        if (verificandoProximo) {
+            return (
+                <TouchableOpacity style={[styles.botaoProximo, styles.botaoCarregando]} disabled>
+                    <Text style={styles.textoBotaoProximo}>Verificando...</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        if (temProximoExercicio) {
+            return (
+                <TouchableOpacity
+                    style={styles.botaoProximo}
+                    onPress={irParaProximoExercicio}
+                >
+                    <Text style={styles.textoBotaoProximo}>Próximo</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        return (
+            <View style={styles.containerFinal}>
+                <View style={[styles.botaoProximo, styles.botaoDesabilitado]}>
+                    <Text style={styles.textoBotaoDesabilitado}>
+                        No momento não há mais exercícios disponíveis...
+                    </Text>
+
+                </View>
+                <View style={styles.containerExtras}>
+                    <TouchableOpacity onPress={iniciarOuResetarJogo}>
+                        <Text style={styles.textoBotaoNovo}>
+                            Reiniciar
+                        </Text>
+                    </TouchableOpacity>
+
+                    <View>{renderizarBotaoComentar()}</View>
+                </View>
+            </View>
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -329,22 +478,28 @@ export function Jogo({ exercicio, linhas, colunas, nivel, mate, corAdversario, c
             </View>
 
             {/* Controles do jogo */}
-            <View style={styles.controles}>
-                <TouchableOpacity
-                    style={[styles.botaoVoltar, !podeVoltarLance && styles.botaoDesabilitado]}
-                    onPress={voltarLance}
-                    disabled={!podeVoltarLance}
-                >
-                    <AntDesign name="arrowleft" size={24} color="#2D2A31" />
-                </TouchableOpacity>
+            {statusJogo === 'jogando' || statusJogo === 'perdeu' ? (
+                <View style={styles.controles}>
+                    <TouchableOpacity
+                        style={[styles.botaoVoltar, !podeVoltarLance && styles.botaoDesabilitado]}
+                        onPress={voltarLance}
+                        disabled={!podeVoltarLance}
+                    >
+                        <AntDesign name="arrowleft" size={24} color="#f5f5f5" />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.botaoReiniciar}
-                    onPress={iniciarOuResetarJogo}
-                >
-                    <Text style={styles.textoBotao}><SimpleLineIcons name="reload" size={30} color="#2D2A31" /></Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                        style={styles.botaoReiniciar}
+                        onPress={iniciarOuResetarJogo}
+                    >
+                        <Text style={styles.textoBotao}>
+                            <SimpleLineIcons name="reload" size={30} color="#f5f5f5" />
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                renderizarBotaoProximo()
+            )}
         </View>
     );
 }
